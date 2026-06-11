@@ -1,41 +1,55 @@
 #run.py
 from src.graph import KnowledgeGraph
+from src.search import fuzzy_search
 
 def main():
     kg = KnowledgeGraph()
-    print("=== NeuroMémor CLI v0.1 ===")
+    print("=== NeuroMémor v0.2 ===")
     print("A collaborative knowledge base for developers\n")
-    
+
     while True:
         print("\n1. Add a correction")
-        print("2. Search for a solution")
-        print("3. Quit")
+        print("2. Search (fuzzy)")
+        print("3. Vote for a solution")
+        print("4. Export the graph")
+        print("5. Import a graph")
+        print("6. Quit")
         choice = input("> ")
-        
+
         if choice == "1":
-            error = input("Error encountered : ")
-            solution = input("Solution found : ")
+            error = input("Error : ")
+            solution = input("Solution : ")
             kg.add_correction(error, solution)
-            print("✅ Correction added successfully.")
-        
+            print("✅ Correction added.")
+
         elif choice == "2":
-            query = input("Search for an error (keywords): ")
-            results = kg.search_by_text(query)
+            query = input("Search : ")
+            results = fuzzy_search(kg.graph, query)
             if results:
-                print(f"\n🔍 {len(results)} result(s) found:")
-                for i, r in enumerate(results, 1):
-                    print(f"\n--- Result {i} ---")
-                    print(f"🔴 Error : {r['error']}")
-                    print(f"✅ Solution : {r['solution']} (weight: {r['weight']})")
+                for r in results:
+                    print(f"\n🔴 Error : {r['error']}")
+                    print(f"✅ Solution : {r['solution']} (weight: {r['weight']}, similarity: {r['similarity']})")
             else:
-                print("❌ No results were found for this search.")
-        
+                print("❌ No results found.")
+
         elif choice == "3":
+            error = input("Error to vote for : ")
+            solution = input("Solution to vote for : ")
+            print(kg.vote_solution(error, solution))
+
+        elif choice == "4":
+            path = input("Export path (ex: export.json) : ")
+            print(kg.export_to_file(path))
+
+        elif choice == "5":
+            path = input("Import path (ex: export.json) : ")
+            print(kg.import_from_file(path))
+
+        elif choice == "6":
             print("Thank you for using NeuroMémor. See you soon!")
             break
-        
         else:
-            print("Invalid choice. Enter 1, 2 or 3.")
+            print("Invalid choice. Please enter a number between 1 and 6.")
 
 if __name__ == "__main__":
     main()

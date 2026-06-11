@@ -76,3 +76,47 @@ class KnowledgeGraph:
                                     "weight": edge['weight']
                                 })
         return results
+    
+    def vote_solution(self, error_text: str, solution_text: str):
+        """Ajoute un vote pour une solution existante."""
+        # Trouver le nœud erreur
+        error_node = None
+        solution_node = None
+        for node in self.graph['nodes']:
+            if node['type'] == 'error' and node['text'] == error_text:
+                error_node = node
+            if node['type'] == 'solution' and node['text'] == solution_text:
+                solution_node = node
+        
+        if not error_node or not solution_node:
+            return "Error or solution not found."
+        
+        # Trouver le lien entre eux
+        for edge in self.graph['edges']:
+            if edge['source'] == error_node['id'] and edge['target'] == solution_node['id']:
+                edge['weight'] += 1
+                self._save()
+                return f"✅ Weight increased to {edge['weight']}."
+        
+        return "No link has been found between this error and this solution."
+    
+
+    def export_to_file(self, filepath: str):
+        """Exporte le graphe vers un fichier JSON."""
+        with open(filepath, 'w') as f:
+            json.dump(self.graph, f, indent=2)
+        return f"✅ Exported to {filepath}"
+
+    def import_from_file(self, filepath: str):
+        """Importe un graphe depuis un fichier JSON."""
+        with open(filepath, 'r') as f:
+            imported = json.load(f)
+        # Fusion simple (ajoute les nœuds et arêtes sans doublon)
+        for node in imported['nodes']:
+            if node not in self.graph['nodes']:
+                self.graph['nodes'].append(node)
+        for edge in imported['edges']:
+            if edge not in self.graph['edges']:
+                self.graph['edges'].append(edge)
+        self._save()
+        return f"✅ Imported {len(imported['nodes'])} nodes and {len(imported['edges'])} edges."
