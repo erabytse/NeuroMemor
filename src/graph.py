@@ -100,6 +100,40 @@ class KnowledgeGraph:
         
         return "No link has been found between this error and this solution."
     
+    def vote_for_solution(self, error_text: str, solution_text: str) -> str:
+        """
+        Ajoute un vote pour une solution existante.
+        Retourne un message de confirmation ou d'erreur.
+        """
+        # Normaliser les textes pour la comparaison
+        from .search import normalize_text
+        error_norm = normalize_text(error_text)
+        solution_norm = normalize_text(solution_text)
+        
+        # Trouver le nœud erreur correspondant (comparaison normalisée)
+        error_node = None
+        solution_node = None
+        
+        for node in self.graph['nodes']:
+            if node['type'] == 'error' and normalize_text(node['text']) == error_norm:
+                error_node = node
+            if node['type'] == 'solution' and normalize_text(node['text']) == solution_norm:
+                solution_node = node
+        
+        if not error_node:
+            return "❌ Erreur introuvable. Vérifie l'énoncé exact."
+        if not solution_node:
+            return "❌ Solution introuvable. Vérifie le texte exact."
+        
+        # Trouver le lien entre erreur et solution
+        for edge in self.graph['edges']:
+            if edge['source'] == error_node['id'] and edge['target'] == solution_node['id']:
+                edge['weight'] += 1
+                self._save()
+                return f"✅ Vote enregistré. Poids de la solution : {edge['weight']}"
+        
+        return "❌ Aucun lien trouvé entre cette erreur et cette solution. As-tu ajouté la correction correctement ?"
+        
 
     def export_to_file(self, filepath: str):
         """Exporte le graphe vers un fichier JSON."""

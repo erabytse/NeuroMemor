@@ -33,8 +33,8 @@ def main():
                 print("❌ No results found.")
 
         elif choice == "3":
-            error = input("Error to vote for : ")
-            solution = input("Solution to vote for : ")
+            error = input("Error you encountered : ")
+            solution = input("A solution that worked : ")
             print(kg.vote_solution(error, solution))
 
         elif choice == "4":
