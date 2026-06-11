@@ -2,6 +2,11 @@
 
 **A collaborative collective memory for developers** – open source, local, distributed.
 
+[![GitHub Stars](https://img.shields.io/github/stars/erabytse/NeuroMemor?style=social)](https://github.com/erabytse/NeuroMemor/stargazers)
+[![GitHub Forks](https://img.shields.io/github/forks/erabytse/NeuroMemor?style=social)](https://github.com/erabytse/NeuroMemor/network/members)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+
 ## 🚀 Installation
 
 ```bash
@@ -40,8 +45,37 @@ Search for an error (keywords) : ImportError
 
 - Collective validation by weight (coming soon)
 
-📄 Licence
-MIT License
-
 🤝 Contribute
 Contributions are welcome! Open an issue or a pull request
+
+## 🤝 How to contribute
+
+We welcome contributions! Here's how you can help:
+
+1. **Report bugs** – Open an issue with a clear description.
+2. **Suggest features** – Open a feature request issue.
+3. **Submit code** – Fork the repo, create a branch, and open a Pull Request.
+
+## 🛠️ Development setup
+
+```bash
+git clone https://github.com/erabytse/NeuroMemor.git
+cd NeuroMemor
+python run.py
+```
+
+📦 Future roadmap
+
+- Similarity search (Jaccard / Levenshtein)
+
+- Weighted validation (community voting)
+
+- Peer-to-peer sync (via IPFS or WebSocket)
+
+- GUI or web interface
+
+- Integration with VS Code
+
+📄 License
+
+MIT © [Erabytse](https://github.com/erabytse)

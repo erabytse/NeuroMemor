@@ -1,3 +1,4 @@
+#run.py
 from src.graph import KnowledgeGraph
 
 def main():
