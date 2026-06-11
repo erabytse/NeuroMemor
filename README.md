@@ -2,8 +2,8 @@
 
 **A collaborative collective memory for developers** – open source, local, distributed.
 
-[![GitHub Stars](https://img.shields.io/github/stars/erabytse/NeuroMemor?style=social)](https://github.com/erabytse/NeuroMemor/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/erabytse/NeuroMemor?style=social)](https://github.com/erabytse/NeuroMemor/network/members)
+![Last Commit](https://img.shields.io/github/last-commit/erabytse/NeuroMemor)
+![Repo Size](https://img.shields.io/github/repo-size/erabytse/NeuroMemor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
