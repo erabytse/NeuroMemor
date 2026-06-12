@@ -121,36 +121,79 @@ class KnowledgeGraph:
                 solution_node = node
         
         if not error_node:
-            return "❌ Erreur introuvable. Vérifie l'énoncé exact."
+            return "❌ Error not found. Check the exact wording."
         if not solution_node:
-            return "❌ Solution introuvable. Vérifie le texte exact."
+            return "❌ Solution not found. Check the exact wording."
         
         # Trouver le lien entre erreur et solution
         for edge in self.graph['edges']:
             if edge['source'] == error_node['id'] and edge['target'] == solution_node['id']:
                 edge['weight'] += 1
                 self._save()
-                return f"✅ Vote enregistré. Poids de la solution : {edge['weight']}"
+                return f"✅ Vote recorded. Weight of the solution : {edge['weight']}"
         
-        return "❌ Aucun lien trouvé entre cette erreur et cette solution. As-tu ajouté la correction correctement ?"
+        return "❌ No link found between this error and this solution. Did you add the correction correctly ?"
+    
+    def export_to_file(self, filepath: str) -> str:
+        """
+        Exporte tout le graphe vers un fichier JSON.
+        Retourne un message de confirmation.
+        """
+        try:
+            with open(filepath, 'w', encoding='utf-8') as f:
+                json.dump(self.graph, f, indent=2, ensure_ascii=False)
+            return f"✅ Export successful to {filepath} ({len(self.graph['nodes'])} nodes, {len(self.graph['edges'])} edges)"
+        except Exception as e:
+            return f"❌ Error during export : {e}"
+
+    def import_from_file(self, filepath: str) -> str:
+        """
+        Importe un graphe depuis un fichier JSON et le fusionne avec le graphe existant.
+        Retourne un message de confirmation.
+        """
+        try:
+            with open(filepath, 'r', encoding='utf-8') as f:
+                imported = json.load(f)
+            
+            # Vérification basique de la structure
+            if not isinstance(imported, dict) or 'nodes' not in imported or 'edges' not in imported:
+                return "❌ Invalid file: must contain “nodes” and “edges”."
+            
+            # Compter avant fusion
+            nodes_before = len(self.graph['nodes'])
+            edges_before = len(self.graph['edges'])
+            
+            # Fusionner les nœuds (sans doublon basé sur l'ID)
+            existing_ids = {node['id'] for node in self.graph['nodes']}
+            for node in imported['nodes']:
+                if node['id'] not in existing_ids:
+                    self.graph['nodes'].append(node)
+                    existing_ids.add(node['id'])
+            
+            # Fusionner les arêtes (sans doublon basé sur source+target)
+            existing_edges = {(edge['source'], edge['target']) for edge in self.graph['edges']}
+            for edge in imported['edges']:
+                key = (edge['source'], edge['target'])
+                if key not in existing_edges:
+                    self.graph['edges'].append(edge)
+                    existing_edges.add(key)
+                else:
+                    # Si l'arête existe déjà, on additionne les poids
+                    for existing_edge in self.graph['edges']:
+                        if existing_edge['source'] == edge['source'] and existing_edge['target'] == edge['target']:
+                            existing_edge['weight'] += edge['weight']
+                            break
+            
+            self._save()
+            
+            nodes_added = len(self.graph['nodes']) - nodes_before
+            edges_added = len(self.graph['edges']) - edges_before
+            
+            return f"✅ Import successful : {nodes_added} new nodes, {edges_added} new edges (merged weights)."
         
-
-    def export_to_file(self, filepath: str):
-        """Exporte le graphe vers un fichier JSON."""
-        with open(filepath, 'w') as f:
-            json.dump(self.graph, f, indent=2)
-        return f"✅ Exported to {filepath}"
-
-    def import_from_file(self, filepath: str):
-        """Importe un graphe depuis un fichier JSON."""
-        with open(filepath, 'r') as f:
-            imported = json.load(f)
-        # Fusion simple (ajoute les nœuds et arêtes sans doublon)
-        for node in imported['nodes']:
-            if node not in self.graph['nodes']:
-                self.graph['nodes'].append(node)
-        for edge in imported['edges']:
-            if edge not in self.graph['edges']:
-                self.graph['edges'].append(edge)
-        self._save()
-        return f"✅ Imported {len(imported['nodes'])} nodes and {len(imported['edges'])} edges."
+        except FileNotFoundError:
+            return f"❌ File not found : {filepath}"
+        except json.JSONDecodeError:
+            return f"❌ Invalid JSON file : {filepath}"
+        except Exception as e:
+            return f"❌ Error during import : {e}"

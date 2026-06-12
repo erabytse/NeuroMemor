@@ -4,7 +4,7 @@ from src.search import fuzzy_search
 
 def main():
     kg = KnowledgeGraph()
-    print("=== NeuroMémor v0.2 ===")
+    print("=== NeuroMémor v0.3 ===")
     print("A collaborative knowledge base for developers\n")
 
     while True:
@@ -35,7 +35,7 @@ def main():
         elif choice == "3":
             error = input("Error you encountered : ")
             solution = input("A solution that worked : ")
-            print(kg.vote_solution(error, solution))
+            print(kg.vote_for_solution(error, solution))
 
         elif choice == "4":
             path = input("Export path (ex: export.json) : ")
