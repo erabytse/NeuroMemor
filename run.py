@@ -1,54 +1,61 @@
-#run.py
+import threading  
 import time
-
 from src.graph import KnowledgeGraph
 from src.search import fuzzy_search
 from src.network import GossipProtocol
-import threading
+from src.api import start_api  
 
-
+# Variable globale pour les logs
+VERBOSE_GLOBAL = True  
 
 def main():
+    global VERBOSE_GLOBAL  
+    
     kg = KnowledgeGraph()
     network = GossipProtocol(kg)
-    VERBOSE = False
+    
+    # Appliquer le niveau de verbose initial
+    network.set_verbose(VERBOSE_GLOBAL)
     
     # Démarrer le protocole Gossip dans un thread
     network_thread = threading.Thread(target=network.start)
     network_thread.daemon = True
-    network_thread.start()  # Démarrage sans auto-discovery pour éviter les logs initiaux
+    network_thread.start()
     
-    print("=== NeuroMémor v0.5 - Peer-to-Peer ===")
+    # Démarrer l'API automatiquement (thread séparé)
+    api_thread = threading.Thread(target=start_api, daemon=True)
+    api_thread.start()
+    
+    print("=== NeuroMémor v0.6 ===")
     print("A collaborative knowledge base for developers")
+    print("🌐 REST API available at http://localhost:8000")
+    print("🌐 Web interface available at http://localhost:8000 (opens the web/index.html file)\n")
     print(f"Local IP: {network.local_ip}, Port: {network.port}")
+    print(f"🔊 Network logs: {'Enabled' if VERBOSE_GLOBAL else 'Disabled'}\n")
     print("Peers will be automatically discovered on the local network.\n")
     print("Note: Corrections added will be shared with connected peers in real-time.\n")
     print("Please wait a moment for peer discovery to complete before adding corrections or searching.\n")
     print("=== Menu ===")
 
-    if not network.peers:
-        print("No peers detected yet. Please wait while we discover other instances on the network...")
-    else:        print(f"Connected peers: {', '.join(network.peers.keys())}")
-    
-    while True: 
-        
+
+    while True:
+
         print("\n1. Add a correction")
         print("2. Search (fuzzy)")
         print("3. Vote for a solution")
         print("4. Export the graph")
         print("5. Import a graph")
-        print("\n6. Add a peer manually")
-        print("7. Scan a range of IP addresses for peers")
-        print("8. Show connected peers")
-        print("9. Enable/disable network logs")
-        print("10. Quit")
+        print("6. Add a peer manually")
+        print("7. Show connected peers")
+        print("8. Enable/disable network logs")
+        print("9. Quit")
         choice = input("> ")
         
         if choice == "1":
             error = input("Error : ")
             solution = input("Solution : ")
             kg.add_correction(error, solution)
-            # Diffuser la nouvelle correction aux pairs
+            # Diffuser la correction aux pairs
             network.send_update(error, solution)
             print("✅ Correction added and broadcast to peers.")
             
@@ -56,14 +63,15 @@ def main():
             query = input("Search : ")
             results = fuzzy_search(kg.graph, query)
             if results:
-                for r in results:
-                    print(f"\n🔴 Error : {r['error']}")
+                for i, r in enumerate(results, 1):
+                    print(f"\n--- Result {i} ---")
+                    print(f"🔴 Error : {r['error']}")
                     print(f"✅ Solution : {r['solution']} (weight: {r['weight']}, similarity: {r['similarity']})")
             else:
-                print("❌ No results found.")
+                print("❌ No solution found.")
                 
         elif choice == "3":
-            error = input("Error that you encountered : ")
+            error = input("Error you encountered : ")
             solution = input("Solution that worked : ")
             print(kg.vote_for_solution(error, solution))
             
@@ -76,25 +84,20 @@ def main():
             print(kg.import_from_file(path))
             
         elif choice == "6":
-            ip = input("IP du pair (ex: 192.168.1.10) : ")
+            ip = input("IP of the peer (e.g., 192.168.0.9) : ")
             print(network.add_peer_manual(ip))
             
         elif choice == "7":
-            start = input("IP de début (ex: 192.168.1.1) : ")
-            end = input("IP de fin (ex: 192.168.1.254) : ")
-            print(network.discover_peers_manual(start, end))
-            
-        elif choice == "8":
             print(f"\nConnected peers ({len(network.peers)}):")
             for ip, last_seen in network.peers.items():
                 print(f"  • {ip} (seen {int(time.time() - last_seen)}s ago)")
-
-        elif choice == "9":
-            VERBOSE = not VERBOSE
-            network.set_verbose(VERBOSE)
-            print(f"Network logs: {'Enabled' if VERBOSE else 'Disabled'}")
                 
-        elif choice == "10":
+        elif choice == "8":
+            VERBOSE_GLOBAL = not VERBOSE_GLOBAL
+            network.set_verbose(VERBOSE_GLOBAL)
+            print(f"🔊 Network logs: {'Enabled' if VERBOSE_GLOBAL else 'Disabled'}")
+            
+        elif choice == "9":
             print("Stopping the protocol...")
             network.stop()
             print("Thank you for using NeuroMémor. See you soon!")

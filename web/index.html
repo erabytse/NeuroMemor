@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeuroMémor - Collective Memory</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: auto; padding: 20px; background: #f5f5f5; }
+        .container { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1 { color: #2c3e50; }
+        input, textarea { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px; }
+        button { background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #2980b9; }
+        .result { background: #e8f4f8; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .error { color: #e74c3c; }
+        .solution { color: #27ae60; }
+        .weight { font-size: 0.9em; color: #7f8c8d; }
+        .tab { display: flex; margin-bottom: 20px; }
+        .tab button { flex: 1; background: #ecf0f1; border: none; padding: 10px; cursor: pointer; }
+        .tab button.active { background: #3498db; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 NeuroMémor</h1>
+        <p><em>A community knowledge base for developers</em></p>
+        
+        <div class="tab">
+            <button class="active" onclick="switchTab('search')">Search</button>
+            <button onclick="switchTab('add')">Add</button>
+            <button onclick="switchTab('vote')">Vote</button>
+            <button onclick="switchTab('stats')">Statistics</button>
+        </div>
+        
+        <div id="search" class="tab-content active">
+            <h3>Search for a solution</h3>
+            <input type="text" id="searchQuery" placeholder="Enter the error (e.g., ImportError)" />
+            <button onclick="searchCorrection()">Search</button>
+            <div id="searchResults"></div>
+        </div>
+        
+        <div id="add" class="tab-content">
+            <h3>Add a correction</h3>
+            <textarea id="addError" rows="2" placeholder="Error encountered"></textarea>
+            <textarea id="addSolution" rows="2" placeholder="Solution found"></textarea>
+            <button onclick="addCorrection()">Add</button>
+            <div id="addResult"></div>
+        </div>
+        
+        <div id="vote" class="tab-content">
+            <h3>Vote for a solution</h3>
+            <textarea id="voteError" rows="2" placeholder="Error"></textarea>
+            <textarea id="voteSolution" rows="2" placeholder="Solution that worked"></textarea>
+            <button onclick="voteCorrection()">Vote</button>
+            <div id="voteResult"></div>
+        </div>
+        
+        <div id="stats" class="tab-content">
+            <h3>Statistics</h3>
+            <button onclick="showStats()">Refresh</button>
+            <div id="statsResult"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:8000";
+        
+        function switchTab(id) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.tab button').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+        
+        async function searchCorrection() {
+            const query = document.getElementById('searchQuery').value;
+            if (!query) return alert('Entrez une erreur à rechercher');
+            const res = await fetch(`${API_BASE}/search?query=${encodeURIComponent(query)}`);
+            const data = await res.json();
+            const container = document.getElementById('searchResults');
+            if (data.length === 0) {
+                container.innerHTML = '<p>No solution found.</p>';
+                return;
+            }
+            container.innerHTML = data.map(r => `
+                <div class="result">
+                    <div class="error">🔴 ${r.error}</div>
+                    <div class="solution">✅ ${r.solution}</div>
+                    <div class="weight">Weight: ${r.weight} | Similarity: ${r.similarity}</div>
+                </div>
+            `).join('');
+        }
+        
+        async function addCorrection() {
+            const error = document.getElementById('addError').value;
+            const solution = document.getElementById('addSolution').value;
+            if (!error || !solution) return alert('Remplissez les deux champs');
+            const res = await fetch(`${API_BASE}/correction`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({error, solution})
+            });
+            const data = await res.json();
+            document.getElementById('addResult').innerHTML = `<p>✅ ${data.message}</p>`;
+            document.getElementById('addError').value = '';
+            document.getElementById('addSolution').value = '';
+        }
+        
+        async function voteCorrection() {
+            const error = document.getElementById('voteError').value;
+            const solution = document.getElementById('voteSolution').value;
+            if (!error || !solution) return alert('Remplissez les deux champs');
+            const res = await fetch(`${API_BASE}/vote`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({error, solution})
+            });
+            const data = await res.json();
+            document.getElementById('voteResult').innerHTML = `<p>✅ ${data.message}</p>`;
+        }
+        
+        async function showStats() {
+            const res = await fetch(`${API_BASE}/stats`);
+            const data = await res.json();
+            document.getElementById('statsResult').innerHTML = `
+                <ul>
+                    <li>🧩 Nodes: ${data.nodes}</li>
+                    <li>🔗 Edges: ${data.edges}</li>
+                    <li>🌐 Peers: ${data.peers}</li>
+                </ul>
+            `;
+        }
+    </script>
+</body>
+</html>
