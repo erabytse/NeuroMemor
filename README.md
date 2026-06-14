@@ -1,11 +1,15 @@
 # NeuroMémor
 
+<p align="center"><img src="logo.png" style="width:70px; height:50px"></p>
+
+
 **A collaborative collective memory for developers** – open source, local, distributed.
 
 ![Last Commit](https://img.shields.io/github/last-commit/erabytse/NeuroMemor)
 ![Repo Size](https://img.shields.io/github/repo-size/erabytse/NeuroMemor)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Hugging Face Space](https://img.shields.io/badge/🤗-Hugging%20Face%20Space-blue)](https://huggingface.co/spaces/erabytse/neuromemor)
 
 ## 🚀 Installation
 
@@ -43,12 +47,18 @@ Search for an error (keywords) : ImportError
 
 - Keyword search (future improvement: Jaccard similarity)
 
-- Collective validation by weight (coming soon)
+- Collective validation by weight
 
-🤝 Contribute
-Contributions are welcome! Open an issue or a pull request
+## 🌐 Web version
+
+Try NeuroMemor online without installation:  
+[https://huggingface.co/spaces/erabytse/neuromemor](https://huggingface.co/spaces/erabytse/neuromemor)
 
 ## 🤝 How to contribute
+
+Try the live demo: [https://huggingface.co/spaces/erabytse/neuromemor](https://huggingface.co/spaces/erabytse/neuromemor)
+
+Contributions are welcome! Open an issue or a pull request
 
 We welcome contributions! Here's how you can help:
 
