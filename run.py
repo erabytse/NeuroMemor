@@ -22,8 +22,9 @@ def main():
     network_thread.daemon = True
     network_thread.start()
     
-    # Démarrer l'API automatiquement (thread séparé)
-    api_thread = threading.Thread(target=start_api, daemon=True)
+    # Démarrer l'API avec les instances de graphe et réseau
+    api_thread = threading.Thread(target=start_api, args=(kg, network))
+    api_thread.daemon = True
     api_thread.start()
     
     print("=== NeuroMémor v0.6 ===")
